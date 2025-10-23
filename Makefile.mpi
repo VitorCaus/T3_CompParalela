@@ -1,0 +1,34 @@
+# ====== VARIÁVEIS ======
+# Nome do arquivo-fonte (sem extensão)
+PROG = sha512_teste
+# Número de máquinas e threads
+N ?= 2
+T ?= 8
+
+# ====== COMANDOS ======
+# Compilador MPI via ladcomp
+CC = ladcomp -env mpicc
+# Nome do executável
+EXEC = $(PROG)
+
+# ====== REGRAS ======
+
+# Regra padrão: compilar
+all: $(EXEC)
+
+# Compilação
+$(EXEC): $(PROG).c
+	$(CC) $< -o $@
+
+# Execução com srun
+run: $(EXEC)
+	srun -N $(N) -n $(T) --exclusive ./$(EXEC)
+
+# Limpeza
+clean:
+	rm -f $(EXEC)
+
+# Limpeza completa
+purge: clean
+	rm -f *.o
+
