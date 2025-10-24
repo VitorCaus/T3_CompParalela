@@ -31,65 +31,10 @@ void inicializa(int vetor[], int tam_vetor)
       vetor[i] = tam_vetor - i;
 }
 
-// int *mergesort()
-// {
-//    int vetor[];
-//    int tam_vetor;
-
-//    int my_rank, num_procs;
-//    MPI_Init(NULL, NULL);
-//    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
-//    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
-
-//    // recebo vetor
-
-//    if (my_rank != 0)
-//    {
-//       MPI_Recv(vetor, pai);                        // não sou a raiz, tenho pai
-//       MPI_Get_count(&Status, MPI_INT, &tam_vetor); // descubro tamanho da mensagem recebida
-//    }
-//    else
-//    {
-//       tam_vetor = ARRAY_SIZE;       // defino tamanho inicial do vetor
-//       inicializa(vetor, tam_vetor); // sou a raiz e portanto gero o vetor - ordem reversa
-//    }
-
-//    // dividir ou conquistar?
-
-//    if (tam_vetor <= DELTA)
-//       bs(tam_vetor, vetor); // conquisto
-//    else
-//    {
-//       // dividir
-//       // quebrar em duas partes e mandar para os filhos
-
-//       MPI_Send(&vetor[0], filho esquerda, tam_vetor / 2);            // mando metade inicial do vetor
-//       MPI_Send(&vetor[tam_vetor / 2], filho direita, tam_vetor / 2); // mando metade final
-
-//       // receber dos filhos
-
-//       MPI_Recv(&vetor[0], filho esquerda);
-//       MPI_Recv(&vetor[tam_vetor / 2], filho direita);
-
-//       // intercalo vetor inteiro
-
-//       interleaving(vetor, tam_vetor);
-//    }
-
-//    // mando para o pai
-
-//    if (my_rank != 0)
-//       MPI_Send(vetor, pai, tam_vetor); // tenho pai, retorno vetor ordenado pra ele
-//    else
-//       Mostra(vetor); // sou o raiz, mostro vetor
-
-//    MPI_Finalize();
-// }
-
 /* recebe um ponteiro para um vetor que contem as mensagens recebidas dos filhos e            */
-/* intercala estes valores em um terceiro vetor auxiliar. Devolve um ponteiro para este vetor */ */
+/* intercala estes valores em um terceiro vetor auxiliar. Devolve um ponteiro para este vetor */
 
-    int *interleaving(int vetor[], int tam)
+int *interleaving(int vetor[], int tam)
 {
    int *vetor_auxiliar;
    int i1, i2, i_aux;
@@ -119,8 +64,9 @@ int main(int argc, char *argv[])
    }
 
    double start_time, end_time;
-   int vetor[];
+   int *vetor = NULL;
    int tam_vetor;
+   int rank_pai;
    MPI_Status status;
 
    int my_rank, num_procs;
@@ -133,7 +79,7 @@ int main(int argc, char *argv[])
    if (my_rank != 0)
    {
       // não sou a raiz, tenho pai
-      int rank_pai = (my_rank - 1) / 2;
+      rank_pai = (my_rank - 1) / 2;
       MPI_Recv(vetor, tam_vetor, MPI_INT, rank_pai, 0, MPI_COMM_WORLD, &status);
       // descubro tamanho da mensagem recebida
       MPI_Get_count(&status, MPI_INT, &tam_vetor);
@@ -172,30 +118,35 @@ int main(int argc, char *argv[])
 
       if (filho_esq >= num_procs || filho_dir >= num_procs)
       {
-         //sem filhos restantes para dividir
+         // sem filhos restantes para dividir
          bs(tam_vetor, vetor);
       }
       else
       {
 
-         MPI_Send(&vetor[0], tam_vetor / 2, MPI_INT, filho_esq, 0, MPI_COMM_WORLD); // mando metade inicial do vetor
-         MPI_Send(&vetor[tam_vetor / 2], filho filho_dir, tam_vetor / 2);           // mando metade final
+         MPI_Send(&vetor[0], tam_vetor / 2, MPI_INT, filho_esq, 0, MPI_COMM_WORLD);             // mando metade inicial do vetor
+         MPI_Send(&vetor[tam_vetor / 2], tam_vetor / 2, MPI_INT, filho_dir, 0, MPI_COMM_WORLD); // mando metade final
       }
 
       // receber dos filhos
 
-      MPI_Recv(&vetor[0], filho_esq);
-      MPI_Recv(&vetor[tam_vetor / 2], filho_dir);
+      MPI_Recv(&vetor[0], tam_vetor / 2, MPI_INT, filho_esq, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+      MPI_Recv(&vetor[tam_vetor / 2], tam_vetor / 2, MPI_INT, filho_dir, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 
       // intercalo vetor inteiro
 
-      interleaving(vetor, tam_vetor);
+      int *vetor_intercalado = interleaving(vetor, tam_vetor);
+      free(vetor);
+      vetor = vetor_intercalado;
    }
 
    // mando para o pai
 
    if (my_rank != 0)
-      MPI_Send(vetor, pai, tam_vetor); // tenho pai, retorno vetor ordenado pra ele
+   {
+      MPI_Send(vetor, tam_vetor, MPI_INT, rank_pai, 0, MPI_COMM_WORLD);
+   }
+   // tenho pai, retorno vetor ordenado pra ele
    else
    {
 #ifdef DEBUG
