@@ -1,10 +1,11 @@
 # ====== VARIÁVEIS ======
 # Nome do arquivo-fonte (sem extensão)
-PROG = sha512_teste
+PROG = mergeSort
 # Número de máquinas e threads
 N ?= 2
 T ?= 8
-
+V ?= 40
+D ?= 0
 # ====== COMANDOS ======
 # Compilador MPI via ladcomp
 CC = ladcomp -env mpicc
@@ -22,7 +23,7 @@ $(EXEC): $(PROG).c
 
 # Execução com srun
 run: $(EXEC)
-	srun -N $(N) -n $(T) --exclusive ./$(EXEC)
+	srun -N $(N) -n $(T) --exclusive ./$(EXEC) $(V) $(D)
 
 # Limpeza
 clean:
