@@ -72,5 +72,3 @@ executar_todos:
 clean:
 	@rm -f $(OUTPUT_WORDS) $(OUTPUT_HASHES)
 	@find $(RESULT_DIR) -type f -name '*.txt' -delete || true
-
-
