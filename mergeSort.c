@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
    }
 
    debug = (argc == 2 || atoi(argv[2]) == 0) ? 0 : 1;
-   
+
    double start_time, end_time;
    int *vetor = NULL;
    int tam_vetor;
@@ -94,6 +94,49 @@ int main(int argc, char *argv[])
    MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
    MPI_Comm_size(MPI_COMM_WORLD, &num_procs);
 
+   //---------------------
+   // Versao Sequencial
+   //---------------------
+
+   if (num_procs == 1)
+   {
+      // defino vetor
+      tam_vetor = atoi(argv[1]);
+      vetor = (int *)malloc(sizeof(int) * tam_vetor);
+
+      // sou a raiz e gero vetor
+      inicializa(vetor, tam_vetor);
+      if (debug)
+      {
+         printf("\nVetor: ");
+         for (int i = 0; i < tam_vetor; i++) /* print unsorted array */
+            printf("[%03d] ", vetor[i]);
+      }
+
+      start_time = MPI_Wtime();
+
+      // ordeno o vetor
+      bs(tam_vetor, vetor);
+
+      end_time = MPI_Wtime();
+
+      if (debug)
+      {
+         printf("\nVetor: ");
+         for (int i = 0; i < tam_vetor; i++)
+            printf("[%03d] ", vetor[i]);
+      }
+
+      printf("\n[Final] Tempo total: %f segundos\n", end_time - start_time);
+
+      free(vetor);
+      MPI_Finalize();
+      return 0;
+   }
+
+   //---------------------
+   // Versao Paralela
+   //---------------------
    // recebo vetor
    if (my_rank != 0)
    {

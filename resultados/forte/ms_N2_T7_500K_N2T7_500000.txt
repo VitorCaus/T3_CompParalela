@@ -1,7 +1,7 @@
 make[1]: Entering directory '/home/cp14/T3_CompParalela'
 ladcomp -env mpicc mergeSort.c -o mergeSort
 mpicc mergeSort.c -o mergeSort
-srun -N 2 -n 5 --exclusive ./mergeSort 128 
+srun -N 2 -n 7 --exclusive ./mergeSort 500000 
 
-[Final] Tempo total: 0.020325 segundos
+[Final] Tempo total: 72.286772 segundos
 make[1]: Leaving directory '/home/cp14/T3_CompParalela'
