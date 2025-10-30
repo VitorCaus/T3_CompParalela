@@ -1,0 +1,43 @@
+# ====== VARIÁVEIS ======
+# Nome do arquivo-fonte (sem extensão)
+PROG = mpi_mergesort
+# Número de máquinas e threads
+N ?= 2
+T ?= 8
+V ?= 40
+
+# ====== COMANDOS ======
+# Compilador MPI via ladcomp
+CC = ladcomp -env mpicc
+# Nome do executável
+EXEC = $(PROG)
+
+# ====== FLAGS ======
+CFLAGS = -O3 -g -Wall -Werror
+LDFLAGS = -lm
+
+# ====== REGRAS ======
+
+# Regra padrão: compilar
+all: $(EXEC)
+
+# Compila o programa principal junto com get_time.o
+$(EXEC): $(PROG).c get_time.o
+	$(CC) $(CFLAGS) $^ $(LDFLAGS) -o $@
+
+# Compila get_time.c em objeto
+get_time.o: get_time.c
+	gcc $(CFLAGS) -c $< -o $@
+
+# Execução com srun
+run: $(EXEC)
+	srun -N $(N) -n $(T) --exclusive ./$(EXEC) $(V)
+
+# Limpeza
+clean:
+	rm -f $(EXEC) get_time.o
+
+# Limpeza completa
+purge: clean
+	rm -f *.o
+
