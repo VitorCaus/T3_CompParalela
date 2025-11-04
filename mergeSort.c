@@ -200,7 +200,7 @@ int main(int argc, char *argv[])
       if (filho_esq >= num_procs || filho_dir >= num_procs)
       {
          // sem filhos restantes para dividir
-         if (debug)
+         if (debug || 1)
          {
             printf("[Filho %d] Ordenando por BS vetor de tamanho %d (sem filhos)\n", my_rank, tam_vetor);
          }
@@ -290,4 +290,3 @@ int main(int argc, char *argv[])
 
    return 0;
 }
-
