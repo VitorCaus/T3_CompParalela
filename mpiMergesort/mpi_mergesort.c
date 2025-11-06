@@ -28,8 +28,10 @@
 #include <mpi.h>
 
 // Arrays size <= SMALL switches to insertion sort
-#define SMALL 32
-
+//#define SMALL 32
+#define SMALL 1000000
+// deixar 1M -> chega no merge e já ordena direto (sem dividir nada)
+// com isso, o merge vira só um 'intercalador' (como na versão do moodle), sem impactar no tempo
 extern double get_time(void);
 void bs(int n, int *vetor);
 void merge(int a[], int size, int temp[]);
